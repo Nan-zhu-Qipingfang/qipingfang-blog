@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>七平方の Blog</title>
+    <meta name="description" content="探索技术 · 分享生活 · 记录思考">
+    <meta name="keywords" content="博客，技术，分享，生活">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="alternate" type="application/rss+xml" title="七平方の Blog RSS" href="rss.xml">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/liquid-glass.css">
+</head>
+<body>
+    <!-- 液态背景 -->
+    <div class="liquid-background">
+        <div class="liquid-blob blob-1"></div>
+        <div class="liquid-blob blob-2"></div>
+        <div class="liquid-blob blob-3"></div>
+        <div class="liquid-blob blob-4"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="glass-nav">
+        <div class="nav-content">
+            <div class="logo" onclick="navigateTo('home')">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text" id="blog-title">七平方の Blog</span>
+            </div>
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="#" class="active" data-page="home">
+                        <span class="nav-icon">🏠</span>
+                        <span>首页</span>
+                    </a></li>
+                    <li><a href="#" data-page="archive">
+                        <span class="nav-icon">📚</span>
+                        <span>归档</span>
+                    </a></li>
+                    <li><a href="#" data-page="about">
+                        <span class="nav-icon">👤</span>
+                        <span>关于</span>
+                    </a></li>
+                    <li><a href="#" data-page="wall">
+                        <span class="nav-icon">💬</span>
+                        <span>交流墙</span>
+                    </a></li>
+                    <li><a href="rss.xml" target="_blank" class="rss-link">
+                        <span class="nav-icon">📡</span>
+                        <span>订阅</span>
+                    </a></li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <button class="nav-icon-btn" onclick="toggleSearch()" title="搜索">🔍</button>
+                <button class="nav-icon-btn" onclick="toggleTheme()" title="切换主题" id="theme-btn">🌙</button>
+                <button class="nav-icon-btn mobile-menu-btn" onclick="toggleMobileMenu()" title="菜单">☰</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="logo-icon">✦</span>
+            <span class="logo-text">七平方の Blog</span>
+            <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="#" onclick="navigateTo('home'); toggleMobileMenu();">
+                <span class="nav-icon">🏠</span>
+                <span>首页</span>
+            </a>
+            <a href="#" onclick="navigateTo('archive'); toggleMobileMenu();">
+                <span class="nav-icon">📚</span>
+                <span>归档</span>
+            </a>
+            <a href="#" onclick="navigateTo('about'); toggleMobileMenu();">
+                <span class="nav-icon">👤</span>
+                <span>关于</span>
+            </a>
+            <a href="#" onclick="navigateTo('wall'); toggleMobileMenu();">
+                <span class="nav-icon">💬</span>
+                <span>交流墙</span>
+            </a>
+            <a href="rss.xml" target="_blank">
+                <span class="nav-icon">📡</span>
+                <span>订阅</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="搜索文章..." onkeyup="handleSearch(event)">
+            </div>
+            <button class="search-close" onclick="toggleSearch()">✕</button>
+        </div>
+        <div class="search-results" id="search-results"></div>
+    </div>
+
+    <!-- 阅读进度条 -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- 主容器 -->
+    <main class="container">
+        <!-- 首页视图 -->
+        <div id="home-view" class="view active">
+            <header class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title" id="hero-title">七平方の Blog</h1>
+                    <p class="hero-subtitle" id="hero-subtitle">探索技术 · 分享生活 · 记录思考</p>
+                    <p class="hero-description">
+                        欢迎来到我的个人空间，这里记录着我的学习历程、技术分享和生活感悟。
+                        希望每一篇文章都能给你带来收获和启发。
+                    </p>
+                </div>
+            </header>
+
+            <!-- 文章列表和侧边栏 -->
+            <div class="home-layout">
+                <div class="main-content-area">
+                    <div class="posts-grid" id="posts-container"></div>
+                </div>
+                <aside class="sidebar-widgets">
+                    <!-- 热门文章 -->
+                    <div class="widget">
+                        <h3 class="widget-title">🔥 热门文章</h3>
+                        <div class="hot-posts" id="hot-posts"></div>
+                    </div>
+                    <!-- 标签云 -->
+                    <div class="widget">
+                        <h3 class="widget-title">🏷️ 标签云</h3>
+                        <div class="tag-cloud" id="tag-cloud"></div>
+                    </div>
+                    <!-- RSS 订阅 -->
+                    <div class="widget">
+                        <h3 class="widget-title">📬 订阅更新</h3>
+                        <a href="rss.xml" class="rss-btn" target="_blank">
+                            <span>📡</span> RSS 订阅
+                        </a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- 归档视图 -->
+        <div id="archive-view" class="view">
+            <button class="back-btn" onclick="navigateTo('home')">
+                <span>←</span> 返回
+            </button>
+            <div class="archive-page glass-panel">
+                <h1>📚 文章归档</h1>
+                <div class="archive-list" id="archive-list"></div>
+            </div>
+        </div>
+
+        <!-- 文章详情视图 -->
+        <div id="article-view" class="view">
+            <button class="back-btn" onclick="navigateTo('home')">
+                <span>←</span> 返回
+            </button>
+            <div class="article-wrapper">
+                <!-- 目录 -->
+                <aside class="toc-container">
+                    <h3 class="toc-title">📑 目录</h3>
+                    <nav class="toc-list" id="toc-list"></nav>
+                </aside>
+                <!-- 文章内容 -->
+                <article class="article-content" id="article-content">
+                    <!-- 文章内容将通过 JS 动态加载 -->
+                </article>
+            </div>
+            
+            <!-- 文章操作栏 -->
+            <div class="article-actions">
+                <div class="action-left">
+                    <button class="action-btn" onclick="likeArticle()" id="like-btn">
+                        <span>❤️</span> <span id="like-count">0</span>
+                    </button>
+                    <button class="action-btn" onclick="bookmarkArticle()" id="bookmark-btn">
+                        <span>🔖</span> 收藏
+                    </button>
+                </div>
+                <div class="action-right">
+                    <button class="action-btn" onclick="shareArticle('wechat')">微信</button>
+                    <button class="action-btn" onclick="shareArticle('weibo')">微博</button>
+                    <button class="action-btn" onclick="shareArticle('qq')">QQ</button>
+                    <button class="action-btn" onclick="copyLink()">🔗 复制</button>
+                </div>
+            </div>
+
+            <!-- 相关文章 -->
+            <section class="related-section">
+                <h2 class="section-title">📖 相关文章</h2>
+                <div class="related-posts" id="related-posts"></div>
+            </section>
+            
+            <!-- 评论区 -->
+            <section class="comments-section">
+                <h2 class="comments-title">💬 评论 <span id="comment-count">(0)</span></h2>
+                <form class="comment-form" id="comment-form">
+                    <input type="text" id="comment-name" placeholder="你的昵称" required>
+                    <textarea id="comment-content" placeholder="写下你的评论..." required></textarea>
+                    <button type="submit" class="comment-submit">发表评论</button>
+                </form>
+                <div class="comments-list" id="comments-list"></div>
+            </section>
+        </div>
+
+        <!-- 关于页面 -->
+        <div id="about-view" class="view">
+            <div class="about-page">
+                <h1>关于我</h1>
+                <div class="about-content">
+                    <p>👋 你好！欢迎来到七平方の Blog！</p>
+                    <p>这里是我分享技术文章、生活感悟和创意思考的地方。</p>
+                    <p>我热爱编程、设计和探索新事物，希望通过这个平台记录成长，也帮助到更多志同道合的朋友。</p>
+                    
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <div class="about-feature-icon">💻</div>
+                            <h3>技术分享</h3>
+                            <p>编程教程、开发心得</p>
+                        </div>
+                        <div class="about-feature">
+                            <div class="about-feature-icon">🎨</div>
+                            <h3>设计美学</h3>
+                            <p>UI 设计、视觉创意</p>
+                        </div>
+                        <div class="about-feature">
+                            <div class="about-feature-icon">📚</div>
+                            <h3>学习笔记</h3>
+                            <p>读书笔记、知识整理</p>
+                        </div>
+                        <div class="about-feature">
+                            <div class="about-feature-icon">✈️</div>
+                            <h3>生活记录</h3>
+                            <p>旅行见闻、生活感悟</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 交流墙页面 -->
+        <div id="wall-view" class="view">
+            <div class="wall-page">
+                <div class="wall-header">
+                    <h1 class="wall-title">📢 交流墙</h1>
+                    <p class="wall-subtitle">在这里分享你的想法、问题或任何想说的话</p>
+                </div>
+                
+                <!-- 发帖表单 -->
+                <div class="post-form-container">
+                    <form class="post-form" id="wall-post-form">
+                        <div class="form-row">
+                            <input type="text" id="wall-nickname" placeholder="你的昵称（留空则匿名）">
+                            <select id="wall-category">
+                                <option value="general">💬 综合</option>
+                                <option value="question">❓ 提问</option>
+                                <option value="share">📢 分享</option>
+                                <option value="help">🆘 求助</option>
+                                <option value="other">🔖 其他</option>
+                            </select>
+                        </div>
+                        <input type="text" id="wall-code" placeholder="校验码（首次输入后自动绑定，至少 4 位）" required>
+                        <textarea id="wall-content" placeholder="写下你想说的话..." required></textarea>
+                        <div class="image-upload-area">
+                            <label class="upload-btn">
+                                <span>📷</span> 添加图片
+                                <input type="file" id="wall-image" accept="image/*" multiple onchange="previewImages()">
+                            </label>
+                            <div class="image-preview" id="image-preview"></div>
+                        </div>
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="wall-anonymous">
+                                <span>匿名发布</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="post-submit-btn">
+                            <span>📤</span> 发送帖子
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 筛选栏 -->
+                <div class="wall-filter">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="general">💬 综合</button>
+                    <button class="filter-btn" data-filter="question">❓ 提问</button>
+                    <button class="filter-btn" data-filter="share">📢 分享</button>
+                    <button class="filter-btn" data-filter="help">🆘 求助</button>
+                    <select class="filter-sort" id="wall-sort" onchange="sortWallPosts()">
+                        <option value="newest">最新优先</option>
+                        <option value="hotest">最热优先</option>
+                    </select>
+                </div>
+                
+                <div class="wall-posts" id="wall-posts-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="glass-footer">
+        <p>© 2026 七平方の Blog · 用 ❤ 制作</p>
+        <p class="footer-links">
+            <a href="admin.html" target="_blank">管理后台</a>
+            <a href="rss.xml" target="_blank">RSS 订阅</a>
+        </p>
+    </footer>
+
+    <!-- 分享模态框 -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content share-content">
+            <h3>分享到</h3>
+            <div class="share-options">
+                <button class="share-option" onclick="shareTo('wechat')">
+                    <span class="share-icon wechat">💬</span>
+                    <span>微信</span>
+                </button>
+                <button class="share-option" onclick="shareTo('weibo')">
+                    <span class="share-icon weibo">🔴</span>
+                    <span>微博</span>
+                </button>
+                <button class="share-option" onclick="shareTo('qq')">
+                    <span class="share-icon qq">🐧</span>
+                    <span>QQ</span>
+                </button>
+            </div>
+            <button class="modal-close" onclick="closeShareModal()">✕</button>
+        </div>
+    </div>
+
+    <!-- 图片查看模态框 -->
+    <div id="image-modal" class="modal image-viewer">
+        <div class="modal-content image-content">
+            <img id="image-viewer-img" src="" alt="">
+            <button class="modal-close" onclick="closeImageModal()">✕</button>
+        </div>
+    </div>
+
+    <!-- 引入 marked 解析 Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+    <title>七平方の Blog</title>
+    <link>http://localhost:3000</link>
+    <description>探索技术 · 分享生活 · 记录思考</description>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 01 Mar 2026 00:00:00 GMT</lastBuildDate>
+    <generator>七平方 Blog Generator</generator>
+</channel>
+</rss>

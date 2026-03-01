@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 七平方の Blog</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <span class="logo-icon">✦</span>
+                <h1>七平方の Blog</h1>
+                <p>后台管理系统</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="admin-user">用户名</label>
+                    <input type="text" id="admin-user" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-pass">密码</label>
+                    <input type="password" id="admin-pass" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+                <p class="login-tip">默认账号：admin / admin123</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理后台主界面 -->
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">管理后台</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>控制台</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="posts">
+                    <span class="nav-icon">📝</span>
+                    <span>文章管理</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="wall">
+                    <span class="nav-icon">📢</span>
+                    <span>交流墙管理</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="pending">
+                    <span class="nav-icon">⏳</span>
+                    <span>审核队列</span>
+                    <span class="badge" id="pending-badge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="comments">
+                    <span class="nav-icon">💬</span>
+                    <span>评论管理</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="users">
+                    <span class="nav-icon">👥</span>
+                    <span>用户管理</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="logs">
+                    <span class="nav-icon">📋</span>
+                    <span>操作日志</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="export">
+                    <span class="nav-icon">💾</span>
+                    <span>数据导出</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>系统设置</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="logout-btn">
+                    <span>🚪</span> 退出登录
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <h2 id="page-title">控制台</h2>
+                <div class="user-info">
+                    <span class="user-avatar">👤</span>
+                    <span class="user-name" id="admin-name">管理员</span>
+                </div>
+            </header>
+
+            <!-- 控制台 -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-posts">0</span>
+                            <span class="stat-label">文章总数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📢</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-wall">0</span>
+                            <span class="stat-label">交流墙帖子</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-comments">0</span>
+                            <span class="stat-label">评论总数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-users">0</span>
+                            <span class="stat-label">活跃用户</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-pending">0</span>
+                            <span class="stat-label">待审核</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-views">0</span>
+                            <span class="stat-label">总访问量</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h3>📝 最近文章</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>标题</th>
+                                    <th>日期</th>
+                                    <th>标签</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-posts-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h3>📢 最近帖子</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>用户</th>
+                                    <th>内容</th>
+                                    <th>日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-wall-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文章管理 -->
+            <div id="tab-posts" class="tab-content">
+                <div class="toolbar">
+                    <button class="btn btn-primary" onclick="showEditor()">
+                        <span>➕</span> 新建文章
+                    </button>
+                    <button class="btn btn-danger" onclick="batchDeletePosts()">
+                        <span>🗑️</span> 批量删除
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-posts" onchange="toggleSelectAll()"></th>
+                                <th>标题</th>
+                                <th>摘要</th>
+                                <th>日期</th>
+                                <th>标签</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="posts-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 文章编辑器 -->
+            <div id="tab-editor" class="tab-content">
+                <div class="editor-header">
+                    <button class="btn btn-secondary" onclick="showTab('posts')">
+                        <span>←</span> 返回
+                    </button>
+                    <h3 id="editor-title">新建文章</h3>
+                </div>
+                <form id="post-form" class="editor-form">
+                    <input type="hidden" id="edit-filename">
+                    <div class="form-group">
+                        <label for="post-title">标题</label>
+                        <input type="text" id="post-title" placeholder="输入文章标题" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-excerpt">摘要</label>
+                        <input type="text" id="post-excerpt" placeholder="简短描述（将显示在首页）" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="post-date">日期</label>
+                            <input type="date" id="post-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-tags">标签（用逗号分隔）</label>
+                            <input type="text" id="post-tags" placeholder="如：技术，前端，教程">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-content">正文（Markdown 格式）</label>
+                        <textarea id="post-content" class="markdown-editor" placeholder="使用 Markdown 语法编写文章内容..." required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="showTab('posts')">取消</button>
+                        <button type="submit" class="btn btn-primary">保存发布</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 交流墙管理 -->
+            <div id="tab-wall" class="tab-content">
+                <div class="toolbar">
+                    <input type="text" placeholder="搜索帖子..." class="search-input" onkeyup="searchWallPosts(event)">
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>昵称</th>
+                                <th>用户 ID</th>
+                                <th>分类</th>
+                                <th>内容</th>
+                                <th>点赞</th>
+                                <th>日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wall-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 审核队列 -->
+            <div id="tab-pending" class="tab-content">
+                <div class="pending-info">
+                    <p>待审核的帖子将在此显示，审核通过后会公开发布。</p>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>用户</th>
+                                <th>内容</th>
+                                <th>日期</th>
+                                <th>操作</th>
+                            </thead>
+                        </thead>
+                        <tbody id="pending-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 评论管理 -->
+            <div id="tab-comments" class="tab-content">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>文章</th>
+                                <th>昵称</th>
+                                <th>内容</th>
+                                <th>日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comments-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 用户管理 -->
+            <div id="tab-users" class="tab-content">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>用户 ID</th>
+                                <th>昵称</th>
+                                <th>校验码</th>
+                                <th>发帖数</th>
+                                <th>首次发帖</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 操作日志 -->
+            <div id="tab-logs" class="tab-content">
+                <div class="toolbar">
+                    <button class="btn btn-secondary" onclick="clearLogs()">
+                        <span>🗑️</span> 清空日志
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>操作</th>
+                                <th>详情</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 数据导出 -->
+            <div id="tab-export" class="tab-content">
+                <div class="export-section">
+                    <h3>导出数据</h3>
+                    <p style="color: rgba(255,255,255,0.6); margin-bottom: 1.5rem;">选择要导出的数据类型</p>
+                    
+                    <div class="export-options">
+                        <label class="export-option">
+                            <input type="checkbox" id="export-posts" checked>
+                            <span>📝 文章数据</span>
+                        </label>
+                        <label class="export-option">
+                            <input type="checkbox" id="export-wall" checked>
+                            <span>📢 交流墙数据</span>
+                        </label>
+                        <label class="export-option">
+                            <input type="checkbox" id="export-comments" checked>
+                            <span>💬 评论数据</span>
+                        </label>
+                        <label class="export-option">
+                            <input type="checkbox" id="export-users" checked>
+                            <span>👥 用户数据</span>
+                        </label>
+                        <label class="export-option">
+                            <input type="checkbox" id="export-logs">
+                            <span>📋 操作日志</span>
+                        </label>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="exportData()" style="margin-top: 1.5rem;">
+                        <span>📥</span> 导出选中数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 系统设置 -->
+            <div id="tab-settings" class="tab-content">
+                <form id="settings-form" class="settings-form">
+                    <div class="form-group">
+                        <label>博客标题</label>
+                        <input type="text" id="setting-title" value="七平方の Blog">
+                    </div>
+                    <div class="form-group">
+                        <label>副标题</label>
+                        <input type="text" id="setting-subtitle" value="探索技术 · 分享生活 · 记录思考">
+                    </div>
+                    <div class="form-group">
+                        <label>管理员账号</label>
+                        <input type="text" id="setting-admin" value="admin">
+                    </div>
+                    <div class="form-group">
+                        <label>修改密码</label>
+                        <input type="password" id="setting-password" placeholder="留空则不修改">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>确认删除</h3>
+            <p id="confirm-message">确定要删除此项吗？</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-danger" id="confirm-delete-btn">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
