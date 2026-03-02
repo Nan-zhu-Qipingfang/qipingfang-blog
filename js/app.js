@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCommentForm();
     setupScrollProgress();
     setupSearch();
-    loadTheme();
     loadFontSize();
     setupMobileMenu();
     setupNavScroll();
@@ -565,22 +564,6 @@ function handleSearch(event) {
     }
 }
 
-// 主题切换
-function toggleTheme() {
-    const body = document.body;
-    const isLight = body.classList.toggle('light-theme');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    document.getElementById('theme-btn').textContent = isLight ? '☀️' : '🌙';
-}
-
-function loadTheme() {
-    const theme = localStorage.getItem('theme');
-    if (theme === 'light') {
-        document.body.classList.add('light-theme');
-        document.getElementById('theme-btn').textContent = '☀️';
-    }
-}
-
 // 字体大小调节
 function toggleFontSize() {
     const sizes = ['0.9rem', '1rem', '1.1rem', '1.2rem'];
@@ -992,11 +975,9 @@ window.shareArticle = shareArticle;
 window.copyLink = copyLink;
 window.toggleSearch = toggleSearch;
 window.handleSearch = handleSearch;
-window.toggleTheme = toggleTheme;
 window.toggleFontSize = toggleFontSize;
 window.filterByTag = filterByTag;
 window.likeWallPost = likeWallPost;
-window.toggleReply = toggleReply;
 window.submitReply = submitReply;
 window.reportPost = reportPost;
 window.previewImages = previewImages;
