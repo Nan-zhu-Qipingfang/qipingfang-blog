@@ -3,7 +3,19 @@
   "name": "七平方の Blog",
   "builds": [
     {
-      "src": "index.html",
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "css/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "posts/**",
       "use": "@vercel/static"
     }
   ],
@@ -27,9 +39,12 @@
       "dest": "/posts/$1"
     },
     {
+      "src": "^/(.*\\.html)$",
+      "dest": "/$1"
+    },
+    {
       "src": "^/(.*)$",
       "dest": "/$1"
     }
   ]
 }
-""  
