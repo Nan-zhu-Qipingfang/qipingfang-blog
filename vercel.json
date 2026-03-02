@@ -3,46 +3,21 @@
   "name": "七平方の Blog",
   "builds": [
     {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "css/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "js/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "posts/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.xml",
+      "src": "**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/css/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      },
       "dest": "/css/$1"
     },
     {
       "src": "/js/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      },
       "dest": "/js/$1"
     },
     {
       "src": "/posts/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=3600"
-      },
       "dest": "/posts/$1"
     },
     {

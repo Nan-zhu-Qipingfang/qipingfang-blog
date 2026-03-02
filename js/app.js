@@ -5,6 +5,11 @@ let posts = [];
 let currentFilter = 'all';
 let currentSort = 'newest';
 
+// API 配置 - 部署时修改为你的后端地址
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api'
+    : 'https://your-backend-url.com/api';
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
@@ -232,11 +237,26 @@ function setupScrollProgress() {
 }
 
 // 加载文章统计（点赞等）
-function loadArticleStats() {
+async function loadArticleStats() {
+    try {
+        const response = await fetch(`${API_BASE}/stats/${encodeURIComponent(currentArticle)}`);
+        const stats = await response.json();
+        document.getElementById('like-count').textContent = stats.likes || 0;
+    } catch (error) {
+        console.error('加载统计失败:', error);
+        // 降级：使用 localStorage
+        loadArticleStatsLocal();
+    }
+}
+
+function loadArticleStatsLocal() {
     const stats = JSON.parse(localStorage.getItem(`article-${currentArticle}`) || '{}');
     document.getElementById('like-count').textContent = stats.likes || 0;
-    
     const liked = localStorage.getItem(`liked-${currentArticle}`) === 'true';
+    updateLikeButton(liked);
+}
+
+function updateLikeButton(liked) {
     const likeBtn = document.getElementById('like-btn');
     if (liked) {
         likeBtn.classList.add('liked');
@@ -246,10 +266,36 @@ function loadArticleStats() {
 }
 
 // 点赞文章
-function likeArticle() {
+async function likeArticle() {
+    const hasLiked = localStorage.getItem(`liked-${currentArticle}`) === 'true';
+    const action = hasLiked ? 'remove' : 'add';
+
+    try {
+        const response = await fetch(`${API_BASE}/stats/like`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ article: currentArticle, action })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            document.getElementById('like-count').textContent = result.likes || 0;
+            localStorage.setItem(`liked-${currentArticle}`, action === 'add' ? 'true' : 'false');
+            updateLikeButton(action === 'add');
+        } else {
+            throw new Error('点赞失败');
+        }
+    } catch (error) {
+        console.error('点赞失败:', error);
+        // 降级：使用 localStorage
+        likeArticleLocal();
+    }
+}
+
+function likeArticleLocal() {
     const stats = JSON.parse(localStorage.getItem(`article-${currentArticle}`) || '{}');
     const hasLiked = localStorage.getItem(`liked-${currentArticle}`) === 'true';
-    
+
     if (hasLiked) {
         stats.likes = Math.max(0, (stats.likes || 1) - 1);
         localStorage.removeItem(`liked-${currentArticle}`);
@@ -259,7 +305,7 @@ function likeArticle() {
         localStorage.setItem(`liked-${currentArticle}`, 'true');
         document.getElementById('like-btn').classList.add('liked');
     }
-    
+
     localStorage.setItem(`article-${currentArticle}`, JSON.stringify(stats));
     document.getElementById('like-count').textContent = stats.likes || 0;
 }
@@ -340,17 +386,41 @@ function renderRelatedPosts() {
 }
 
 // 加载评论
-function loadComments() {
-    const comments = JSON.parse(localStorage.getItem(`comments-${currentArticle}`) || '[]');
+async function loadComments() {
+    try {
+        const response = await fetch(`${API_BASE}/comments/${encodeURIComponent(currentArticle)}`);
+        const comments = await response.json();
+        const container = document.getElementById('comments-list');
+        document.getElementById('comment-count').textContent = `(${comments.length})`;
+
+        if (comments.length === 0) {
+            container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 2rem;">暂无评论，快来抢沙发吧～</p>';
+            return;
+        }
+
+        container.innerHTML = comments.map(comment => `
+            <div class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author">👤 ${escapeHtml(comment.name)}</span>
+                    <span class="comment-date">${comment.date}</span>
+                </div>
+                <div class="comment-content">${escapeHtml(comment.content)}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('加载评论失败:', error);
+        // 降级：如果 API 失败，尝试从 localStorage 读取
+        const comments = JSON.parse(localStorage.getItem(`comments-${currentArticle}`) || '[]');
+        if (comments.length > 0) {
+            renderCommentsFromLocal(comments);
+        }
+    }
+}
+
+function renderCommentsFromLocal(comments) {
     const container = document.getElementById('comments-list');
     document.getElementById('comment-count').textContent = `(${comments.length})`;
-    
-    if (comments.length === 0) {
-        container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 2rem;">暂无评论，快来抢沙发吧～</p>';
-        return;
-    }
-    
-    container.innerHTML = comments.map((comment, index) => `
+    container.innerHTML = comments.map(comment => `
         <div class="comment-item">
             <div class="comment-header">
                 <span class="comment-author">👤 ${escapeHtml(comment.name)}</span>
@@ -364,31 +434,43 @@ function loadComments() {
 // 设置评论表单
 function setupCommentForm() {
     const form = document.getElementById('comment-form');
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const name = document.getElementById('comment-name').value.trim();
         const content = document.getElementById('comment-content').value.trim();
-        
+
         if (!name || !content) {
             showToast('请填写昵称和评论内容');
             return;
         }
-        
-        const comments = JSON.parse(localStorage.getItem(`comments-${currentArticle}`) || '[]');
-        comments.push({
-            name,
-            content,
-            date: new Date().toLocaleString('zh-CN')
-        });
-        
-        localStorage.setItem(`comments-${currentArticle}`, JSON.stringify(comments));
-        
-        document.getElementById('comment-name').value = '';
-        document.getElementById('comment-content').value = '';
-        
-        loadComments();
-        showToast('评论成功');
+
+        try {
+            const response = await fetch(`${API_BASE}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ article: currentArticle, name, content })
+            });
+            
+            if (response.ok) {
+                document.getElementById('comment-name').value = '';
+                document.getElementById('comment-content').value = '';
+                loadComments();
+                showToast('评论成功');
+            } else {
+                throw new Error('评论失败');
+            }
+        } catch (error) {
+            console.error('评论失败:', error);
+            // 降级：保存到 localStorage
+            const comments = JSON.parse(localStorage.getItem(`comments-${currentArticle}`) || '[]');
+            comments.push({ name, content, date: new Date().toLocaleString('zh-CN') });
+            localStorage.setItem(`comments-${currentArticle}`, JSON.stringify(comments));
+            document.getElementById('comment-name').value = '';
+            document.getElementById('comment-content').value = '';
+            loadComments();
+            showToast('评论成功 (本地存储)');
+        }
     });
 }
 
@@ -518,35 +600,46 @@ function loadFontSize() {
 }
 
 // 交流墙功能
-function loadWallPosts() {
+async function loadWallPosts() {
+    try {
+        const response = await fetch(`${API_BASE}/wall`);
+        const posts = await response.json();
+        renderWallPosts(posts);
+    } catch (error) {
+        console.error('加载交流墙失败:', error);
+        // 降级：使用 localStorage
+        loadWallPostsLocal();
+    }
+}
+
+function loadWallPostsLocal() {
     const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
     const pendingPosts = JSON.parse(localStorage.getItem('wall-posts-pending') || '[]');
     const posts = [...allPosts, ...pendingPosts];
-    
     renderWallPosts(posts);
 }
 
 function renderWallPosts(posts) {
     const container = document.getElementById('wall-posts-container');
-    
+
     let filtered = posts;
     if (currentFilter !== 'all') {
         filtered = posts.filter(p => p.category === currentFilter);
     }
-    
+
     if (currentSort === 'hotest') {
         filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     } else {
         filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
-    
+
     if (filtered.length === 0) {
         container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 3rem; font-size: 1.1rem;">暂无帖子，快来发表第一个帖子吧！</p>';
         return;
     }
-    
+
     container.innerHTML = filtered.map((post, index) => `
-        <div class="wall-post" style="animation-delay: ${index * 0.1}s">
+        <div class="wall-post" data-id="${post.id}" style="animation-delay: ${index * 0.1}s">
             <div class="wall-post-header">
                 <div class="wall-post-author">
                     <div class="author-avatar">${post.anonymous ? '👤' : (post.nickname || '匿名').charAt(0).toUpperCase()}</div>
@@ -605,72 +698,67 @@ function getCategoryName(cat) {
 
 function setupWallForm() {
     const form = document.getElementById('wall-post-form');
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const nickname = document.getElementById('wall-nickname').value.trim();
         const code = document.getElementById('wall-code').value.trim();
         const content = document.getElementById('wall-content').value.trim();
         const category = document.getElementById('wall-category').value;
         const anonymous = document.getElementById('wall-anonymous').checked;
-        const imageInput = document.getElementById('wall-image');
-        
+
         if (code.length < 4) {
             showToast('校验码至少 4 位');
             return;
         }
-        
+
         if (!content) {
             showToast('请输入内容');
             return;
         }
-        
-        const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
-        const existingUser = allPosts.find(p => p.userCode === code);
-        
-        let userId;
+
+        // 生成/获取 userId
+        let userId = localStorage.getItem('wall-userId-' + code);
         let finalNickname = anonymous ? '匿名' : (nickname || '匿名');
-        
-        if (existingUser) {
-            if (!anonymous && existingUser.nickname !== nickname && nickname) {
-                showToast(`校验码已绑定 "${existingUser.nickname}"`);
-                return;
-            }
-            userId = existingUser.userId;
-            if (!anonymous) finalNickname = existingUser.nickname;
-        } else {
+
+        if (!userId) {
             userId = 'U' + Date.now().toString(36).toUpperCase();
+            localStorage.setItem('wall-userId-' + code, userId);
         }
-        
-        // 处理图片
-        const images = [];
-        
-        const newPost = {
-            nickname: finalNickname,
-            userCode: code,
-            userId,
-            category,
-            anonymous,
-            content,
-            images,
-            likes: 0,
-            replies: [],
-            date: new Date().toLocaleString('zh-CN')
-        };
-        
-        allPosts.unshift(newPost);
-        localStorage.setItem('wall-posts', JSON.stringify(allPosts));
-        
-        document.getElementById('wall-nickname').value = anonymous ? '' : nickname;
-        document.getElementById('wall-code').value = code;
-        document.getElementById('wall-content').value = '';
-        document.getElementById('wall-anonymous').checked = false;
-        document.getElementById('image-preview').innerHTML = '';
-        
-        loadWallPosts();
-        showToast('发帖成功！');
+
+        try {
+            const response = await fetch(`${API_BASE}/wall`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nickname: finalNickname,
+                    userCode: code,
+                    userId,
+                    category,
+                    anonymous,
+                    content,
+                    images: []
+                })
+            });
+            
+            if (response.ok) {
+                document.getElementById('wall-nickname').value = '';
+                document.getElementById('wall-code').value = '';
+                document.getElementById('wall-content').value = '';
+                document.getElementById('wall-anonymous').checked = false;
+                document.getElementById('image-preview').innerHTML = '';
+                loadWallPosts();
+                showToast('发帖成功！');
+            } else {
+                throw new Error('发帖失败');
+            }
+        } catch (error) {
+            console.error('发帖失败:', error);
+            // 降级：保存到 localStorage
+            saveWallPostLocal(nickname, code, userId, category, anonymous, content);
+        }
     });
-    
+
     // 筛选按钮
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -682,12 +770,65 @@ function setupWallForm() {
     });
 }
 
+function saveWallPostLocal(nickname, code, userId, category, anonymous, content) {
+    const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
+    const newPost = {
+        nickname: anonymous ? '匿名' : nickname,
+        userCode: code,
+        userId,
+        category,
+        anonymous,
+        content,
+        images: [],
+        likes: 0,
+        replies: [],
+        date: new Date().toLocaleString('zh-CN')
+    };
+    allPosts.unshift(newPost);
+    localStorage.setItem('wall-posts', JSON.stringify(allPosts));
+    loadWallPosts();
+    showToast('发帖成功 (本地存储)');
+}
+
 function sortWallPosts() {
     currentSort = document.getElementById('wall-sort').value;
     loadWallPosts();
 }
 
-function likeWallPost(index, userId, date) {
+async function likeWallPost(index, userId, date) {
+    // 从 DOM 获取帖子 ID
+    const postElement = document.querySelector(`.wall-post:has(.author-info:has(.author-id:contains("${userId}")))`);
+    const postId = postElement?.dataset?.id;
+    
+    if (!postId) {
+        likeWallPostLocal(userId, date);
+        return;
+    }
+
+    const hasLiked = localStorage.getItem(`liked-wall-${postId}`) === 'true';
+    const action = hasLiked ? 'remove' : 'add';
+
+    try {
+        const response = await fetch(`${API_BASE}/wall/like`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: postId, action })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            localStorage.setItem(`liked-wall-${postId}`, action === 'add' ? 'true' : 'false');
+            loadWallPosts();
+        } else {
+            throw new Error('点赞失败');
+        }
+    } catch (error) {
+        console.error('点赞失败:', error);
+        likeWallPostLocal(userId, date);
+    }
+}
+
+function likeWallPostLocal(userId, date) {
     const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
     const post = allPosts.find(p => p.userId === userId && p.date === date);
     if (post) {
@@ -709,18 +850,48 @@ function toggleReply(id) {
     section.style.display = section.style.display === 'none' ? 'block' : 'none';
 }
 
-function submitReply(userId, date) {
+async function submitReply(userId, date) {
     const input = document.getElementById(`reply-input-${userId}-${date}`);
     const content = input.value.trim();
-    
+
     if (!content) {
         showToast('请输入回复内容');
         return;
     }
-    
+
+    // 尝试从 DOM 获取帖子 ID
+    const replySection = document.getElementById(`reply-${userId}-${date}`);
+    const postElement = replySection?.closest('.wall-post');
+    const postId = postElement?.dataset?.id;
+
+    if (postId) {
+        try {
+            const response = await fetch(`${API_BASE}/wall/reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, name: '访客', content })
+            });
+            
+            if (response.ok) {
+                input.value = '';
+                loadWallPosts();
+                showToast('回复成功');
+            } else {
+                throw new Error('回复失败');
+            }
+        } catch (error) {
+            console.error('回复失败:', error);
+            submitReplyLocal(userId, date, content);
+        }
+    } else {
+        submitReplyLocal(userId, date, content);
+    }
+}
+
+function submitReplyLocal(userId, date, content) {
     const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
     const post = allPosts.find(p => p.userId === userId && p.date === date);
-    
+
     if (post) {
         if (!post.replies) post.replies = [];
         post.replies.push({
@@ -730,7 +901,7 @@ function submitReply(userId, date) {
         });
         localStorage.setItem('wall-posts', JSON.stringify(allPosts));
         loadWallPosts();
-        showToast('回复成功');
+        showToast('回复成功 (本地存储)');
     }
 }
 
