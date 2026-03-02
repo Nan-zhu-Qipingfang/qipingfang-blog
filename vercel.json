@@ -1,24 +1,6 @@
 {
   "version": 2,
   "name": "七平方の Blog",
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "css/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "js/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "posts/**",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "^/css/(.*)$",
