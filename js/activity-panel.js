@@ -53,22 +53,47 @@ function loadStats() {
     let views = localStorage.getItem('site-views') || 0;
     views = parseInt(views) + Math.floor(Math.random() * 10);
     localStorage.setItem('site-views', views);
-    
+
     // 获取文章数量
     const postsCount = posts ? posts.length : 0;
-    
+
     // 获取评论数量
     const comments = JSON.parse(localStorage.getItem('site-comments') || '[]');
     const wallPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
     const commentsCount = comments.length + wallPosts.reduce((acc, post) => acc + (post.replies?.length || 0), 0);
-    
+
     // 计算热度（综合指标）
     const hotValue = views + postsCount * 100 + commentsCount * 50;
     
-    document.getElementById('stat-views').textContent = formatNumber(views);
-    document.getElementById('stat-posts').textContent = formatNumber(postsCount);
-    document.getElementById('stat-comments').textContent = formatNumber(commentsCount);
-    document.getElementById('stat-hot').textContent = formatNumber(hotValue);
+    // 获取标签数量
+    const tagCount = new Set();
+    if (posts) {
+        posts.forEach(post => {
+            if (post.tags) {
+                post.tags.forEach(tag => tagCount.add(tag));
+            }
+        });
+    }
+
+    // 更新动态面板统计
+    const statViews = document.getElementById('stat-views');
+    const statPosts = document.getElementById('stat-posts');
+    const statComments = document.getElementById('stat-comments');
+    const statHot = document.getElementById('stat-hot');
+    
+    if (statViews) statViews.textContent = formatNumber(views);
+    if (statPosts) statPosts.textContent = formatNumber(postsCount);
+    if (statComments) statComments.textContent = formatNumber(commentsCount);
+    if (statHot) statHot.textContent = formatNumber(hotValue);
+    
+    // 更新导航栏统计
+    const navPostCount = document.getElementById('nav-post-count');
+    const navTagCount = document.getElementById('nav-tag-count');
+    const navHotCount = document.getElementById('nav-hot-count');
+    
+    if (navPostCount) navPostCount.textContent = formatNumber(postsCount);
+    if (navTagCount) navTagCount.textContent = formatNumber(tagCount.size);
+    if (navHotCount) navHotCount.textContent = formatNumber(hotValue);
 }
 
 // 格式化数字
