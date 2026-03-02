@@ -703,6 +703,16 @@ async function loadWallPosts() {
 function loadWallPostsLocal() {
     const allPosts = JSON.parse(localStorage.getItem('wall-posts') || '[]');
     const pendingPosts = JSON.parse(localStorage.getItem('wall-posts-pending') || '[]');
+    
+    // 为没有 ID 的帖子生成 ID
+    [...allPosts, ...pendingPosts].forEach((post, index) => {
+        if (!post.id) {
+            post.id = 'post_' + index + '_' + Date.now().toString(36);
+        }
+    });
+    
+    localStorage.setItem('wall-posts', JSON.stringify(allPosts));
+    
     const posts = [...allPosts, ...pendingPosts];
     renderWallPosts(posts);
 }
@@ -715,44 +725,73 @@ function renderWallPosts(posts) {
         filtered = posts.filter(p => p.category === currentFilter);
     }
 
+    // 置顶帖子优先
+    const pinned = filtered.filter(p => p.pinned);
+    const normal = filtered.filter(p => !p.pinned);
+    
     if (currentSort === 'hotest') {
-        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        normal.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     } else {
-        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        normal.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
+    
+    filtered = [...pinned, ...normal];
 
     if (filtered.length === 0) {
         container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 3rem; font-size: 1.1rem;">暂无帖子，快来发表第一个帖子吧！</p>';
         return;
     }
 
-    container.innerHTML = filtered.map((post, index) => `
-        <div class="wall-post" data-id="${post.id}" style="animation-delay: ${index * 0.1}s">
+    container.innerHTML = filtered.map((post, index) => {
+        const userLevel = getUserLevel(post.userId);
+        const signature = getUserSignature(post.userId);
+        const isBookmarked = (JSON.parse(localStorage.getItem('wall-bookmarks') || '[]').includes(post.id));
+        const userCode = localStorage.getItem('wall-userCode');
+        const isAuthor = post.userCode === userCode || userCode === 'admin';
+        
+        return `
+        <div class="wall-post ${post.pinned ? 'pinned' : ''}" data-id="${post.id}" style="animation-delay: ${index * 0.1}s">
             <div class="wall-post-header">
                 <div class="wall-post-author">
-                    <div class="author-avatar">${post.anonymous ? '👤' : (post.nickname || '匿名').charAt(0).toUpperCase()}</div>
+                    ${generateAvatar(post.userId, post.nickname, post.anonymous)}
                     <div class="author-info">
-                        <span class="author-name">${post.anonymous ? '匿名用户' : (post.nickname || '匿名')}</span>
+                        <div class="author-name-row">
+                            <span class="author-name">${post.anonymous ? '匿名用户' : (post.nickname || '匿名')}</span>
+                            ${generateLevelBadge(post.userId)}
+                            ${post.pinned ? '<span class="pin-badge">📌 置顶</span>' : ''}
+                        </div>
                         <span class="author-id">ID: ${post.userId}</span>
+                        ${signature ? `<span class="user-signature">${signature}</span>` : ''}
                     </div>
                 </div>
                 <span class="wall-post-category">${getCategoryName(post.category)}</span>
-                <span class="wall-post-date">${post.date}</span>
+                <span class="wall-post-date">${post.date} ${post.edited ? '<span class="edited-tag">(已编辑)</span>' : ''}</span>
             </div>
             <div class="wall-post-content">${escapeHtml(post.content)}</div>
             ${post.images && post.images.length > 0 ? `
                 <div class="wall-post-images">
-                    ${post.images.map(img => `<img src="${img}" class="wall-post-image" onclick="viewImage('${img}')" alt="">`).join('')}
+                    ${post.images.map((img, imgIndex) => `<img src="${img}" class="wall-post-image" onclick="viewImageEnhanced(${JSON.stringify(post.images)}, ${imgIndex})" alt="">`).join('')}
                 </div>
             ` : ''}
             <div class="wall-post-actions">
-                <button class="wall-action-btn ${post.liked ? 'liked' : ''}" onclick="likeWallPost(${index}, '${post.userId}', '${post.date}')">
+                <button class="wall-action-btn like-btn ${post.liked ? 'liked' : ''}" onclick="likeWallPostEnhanced('${post.id}', '${post.userId}')">
                     ❤️ <span>${post.likes || 0}</span>
                 </button>
                 <button class="wall-action-btn" onclick="toggleReply('${post.userId}-${post.date}')">
                     💬 回复
                 </button>
-                <button class="wall-action-btn" onclick="reportPost('${post.userId}', '${post.date}')">
+                <button class="wall-action-btn bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="bookmarkWallPost('${post.id}')">
+                    🔖 收藏
+                </button>
+                ${isAuthor ? `
+                    <button class="wall-action-btn edit-btn" onclick="editWallPost('${post.id}')">
+                        ✏️ 编辑
+                    </button>
+                    <button class="wall-action-btn delete-btn" onclick="deleteWallPost('${post.id}')">
+                        🗑️ 删除
+                    </button>
+                ` : ''}
+                <button class="wall-action-btn report-btn" onclick="reportWallPost('${post.id}')">
                     🚩 举报
                 </button>
             </div>
@@ -762,15 +801,19 @@ function renderWallPosts(posts) {
                     <button onclick="submitReply('${post.userId}', '${post.date}')">发送</button>
                 </div>
                 <div class="replies-list" id="replies-${post.userId}-${post.date}">
-                    ${(post.replies || []).map(reply => `
+                    ${(post.replies || []).map((reply, replyIndex) => `
                         <div class="reply-item">
+                            <span class="reply-floor">${replyIndex + 1}楼</span>
                             <strong>${escapeHtml(reply.name)}:</strong> ${escapeHtml(reply.content)}
                         </div>
                     `).join('')}
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+    
+    // 初始化表情选择器
+    renderEmojiPicker();
 }
 
 function getCategoryName(cat) {
@@ -804,6 +847,9 @@ function setupWallForm() {
             showToast('请输入内容');
             return;
         }
+
+        // 保存用户代码到 localStorage（用于编辑/删除验证）
+        localStorage.setItem('wall-userCode', code);
 
         // 生成/获取 userId
         let userId = localStorage.getItem('wall-userId-' + code);

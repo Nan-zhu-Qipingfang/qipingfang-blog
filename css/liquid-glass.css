@@ -2758,3 +2758,520 @@ body.light-theme .hero::before {
         transparent 100%
     );
 }
+
+/* ========== 交流墙增强功能样式 ========== */
+
+/* 用户头像 */
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+}
+
+.avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 等级徽章 */
+.level-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    margin-left: 0.5rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 作者名称行 */
+.author-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* 置顶徽章 */
+.pin-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 用户签名 */
+.user-signature {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 0.25rem;
+    font-style: italic;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.light-theme .user-signature {
+    color: #9aa0a6;
+}
+
+/* 编辑标签 */
+.edited-tag {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-left: 0.5rem;
+}
+
+body.light-theme .edited-tag {
+    color: #9aa0a6;
+}
+
+/* 帖子收藏状态 */
+.bookmark-btn.bookmarked {
+    background: rgba(240, 147, 251, 0.3);
+    border-color: rgba(240, 147, 251, 0.6);
+    color: #f093fb;
+}
+
+/* 点赞动画 */
+.like-btn.like-animation {
+    animation: likeBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes likeBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* 表情选择器 */
+.emoji-picker-container {
+    position: relative;
+    display: inline-block;
+}
+
+.emoji-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.emoji-btn:hover {
+    background: rgba(102, 126, 234, 0.25);
+}
+
+.emoji-picker {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.emoji-picker.show {
+    display: grid;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.5rem;
+}
+
+.emoji-btn {
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.emoji-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.2);
+}
+
+body.light-theme .emoji-picker {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+/* @提及建议框 */
+.mention-suggestions {
+    display: none;
+    position: absolute;
+    z-index: 1001;
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mention-suggestions.show {
+    display: block;
+}
+
+.mention-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.mention-item:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+body.light-theme .mention-suggestions {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.light-theme .mention-item {
+    color: #1a1a2e;
+}
+
+body.light-theme .mention-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+/* 图片轮播导航 */
+.image-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    padding: 1rem 1.25rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.image-nav-btn:hover {
+    background: rgba(102, 126, 234, 0.8);
+}
+
+.prev-btn {
+    left: 1rem;
+}
+
+.next-btn {
+    right: 1rem;
+}
+
+.image-indicator {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* 编辑模态框 */
+.edit-modal, .signature-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-modal.show, .signature-modal.show {
+    display: flex;
+}
+
+.edit-modal-content, .signature-modal-content {
+    background: rgba(30, 30, 40, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.edit-modal-content h3, .signature-modal-content h3 {
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.edit-modal-content textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+.edit-modal-content input, .signature-modal-content input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.cancel-btn, .save-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+body.light-theme .edit-modal-content,
+body.light-theme .signature-modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.light-theme .edit-modal-content h3,
+body.light-theme .signature-modal-content h3 {
+    color: #1a1a2e;
+}
+
+body.light-theme .edit-modal-content textarea,
+body.light-theme .signature-modal-content input {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #1a1a2e;
+}
+
+body.light-theme .cancel-btn {
+    background: rgba(102, 126, 234, 0.1);
+    color: #5a6678;
+}
+
+body.light-theme .cancel-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+/* 签名设置按钮 */
+.signature-setting {
+    margin: 0.75rem 0;
+}
+
+.signature-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.signature-btn:hover {
+    background: rgba(102, 126, 234, 0.25);
+    color: #fff;
+}
+
+body.light-theme .signature-btn {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #5a6678;
+}
+
+body.light-theme .signature-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #1a1a2e;
+}
+
+/* 交流墙筛选栏增强 */
+.wall-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.filter-left {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.wall-search-input {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    color: #fff;
+    font-size: 0.9rem;
+    width: 200px;
+    transition: all 0.3s ease;
+}
+
+.wall-search-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(102, 126, 234, 0.5);
+    width: 250px;
+}
+
+.wall-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .wall-search-input {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #1a1a2e;
+}
+
+body.light-theme .wall-search-input:focus {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.light-theme .wall-search-input::placeholder {
+    color: #9aa0a6;
+}
+
+/* 置顶帖子样式 */
+.wall-post.pinned {
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+/* 回复楼层 */
+.reply-floor {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    margin-right: 0.5rem;
+    font-weight: 600;
+}
+
+body.light-theme .reply-floor {
+    background: rgba(102, 126, 234, 0.15);
+    color: #5a6678;
+}
+
+/* 编辑和删除按钮 */
+.edit-btn {
+    background: rgba(240, 147, 251, 0.2);
+    color: #f093fb;
+}
+
+.edit-btn:hover {
+    background: rgba(240, 147, 251, 0.3);
+}
+
+.delete-btn {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+}
+
+.delete-btn:hover {
+    background: rgba(255, 107, 107, 0.3);
+}
+
+body.light-theme .edit-btn {
+    background: rgba(240, 147, 251, 0.15);
+    color: #d06bf0;
+}
+
+body.light-theme .delete-btn {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff5252;
+}
