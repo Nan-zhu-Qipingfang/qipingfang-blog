@@ -110,8 +110,6 @@ body {
         inset 0 -1px 0 rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 900px;
-    max-width: 95vw;
 }
 
 .glass-nav:hover,
@@ -139,17 +137,15 @@ body {
 
 .nav-content {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-/* 顶层导航栏 */
-.nav-top-bar {
-    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 2rem;
+}
+
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 /* Logo 区域 - 霸气的书法风格 */
@@ -157,6 +153,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    cursor: pointer;
 }
 
 .logo-icon {
@@ -191,6 +188,7 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: textGlow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 25px rgba(102, 126, 234, 0.8));
 }
 
 @keyframes textGlow {
@@ -227,174 +225,6 @@ body {
     to {
         filter: drop-shadow(0 0 30px rgba(118, 75, 162, 1));
     }
-}
-
-/* 统计信息 */
-.nav-stats {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.75rem;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.stat-item:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    transform: translateY(-1px);
-}
-
-.stat-item span:last-child {
-    font-weight: 700;
-    color: #667eea;
-}
-
-.stat-divider {
-    color: rgba(255, 255, 255, 0.3);
-    font-weight: 300;
-}
-
-/* 社交按钮 */
-.nav-social {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.social-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 1rem;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
-    border: 1px solid rgba(102, 126, 234, 0.5);
-    border-radius: 16px;
-    color: #fff;
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.social-btn:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%);
-    border-color: rgba(102, 126, 234, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* 底层导航栏 */
-.nav-bottom-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-main-links {
-    display: flex;
-    list-style: none;
-    gap: 0.25rem;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-main-item {
-    position: relative;
-}
-
-.nav-main-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    font-size: 0.95rem;
-    border-radius: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.nav-main-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.nav-main-link.active {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.dropdown-arrow {
-    font-size: 0.7rem;
-    transition: transform 0.3s ease;
-}
-
-.nav-main-item:hover .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-/* 下拉菜单 */
-.nav-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0;
-    min-width: 180px;
-    background: rgba(20, 20, 30, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-    list-style: none;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1001;
-}
-
-.nav-main-item:hover .nav-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.nav-dropdown li a {
-    display: block;
-    padding: 0.65rem 1.25rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.nav-dropdown li a:hover {
-    background: rgba(102, 126, 234, 0.2);
-    color: #fff;
-    padding-left: 1.5rem;
-}
-
-/* 右侧功能按钮 */
-.nav-right-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 /* 旧版导航样式保留（兼容） */
