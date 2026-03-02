@@ -104,7 +104,9 @@
     </div>
 
     <!-- 阅读进度条 -->
-    <div class="progress-bar" id="progress-bar"></div>
+    <div class="progress-bar" id="progress-bar">
+        <span class="progress-text" id="progress-text">0%</span>
+    </div>
 
     <!-- 主容器 -->
     <main class="container">
@@ -155,7 +157,12 @@
             </button>
             <div class="archive-page glass-panel">
                 <h1>📚 文章归档</h1>
+                <div class="archive-tabs">
+                    <button class="archive-tab active" data-view="list" onclick="switchArchiveView('list')">列表视图</button>
+                    <button class="archive-tab" data-view="timeline" onclick="switchArchiveView('timeline')">年表视图</button>
+                </div>
                 <div class="archive-list" id="archive-list"></div>
+                <div class="timeline-list" id="timeline-list" style="display: none;"></div>
             </div>
         </div>
 

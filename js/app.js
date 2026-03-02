@@ -95,16 +95,23 @@ async function loadPosts() {
 // 渲染文章卡片
 function renderPosts(postsToRender) {
     const container = document.getElementById('posts-container');
-    container.innerHTML = postsToRender.map((post, index) => `
+    container.innerHTML = postsToRender.map((post, index) => {
+        const readTime = post.readTime || Math.max(1, Math.ceil((post.excerpt?.length || 100) / 300));
+        const wordCount = post.wordCount || (post.excerpt?.length || 100);
+        return `
         <div class="post-card" onclick="loadArticle('${post.file}', '${post.title.replace(/'/g, "\\'")}')">
             <h2>${post.title}</h2>
+            <div class="post-stats">
+                <span class="stat-item">📊 ${wordCount} 字</span>
+                <span class="stat-item">⏱️ ${readTime} 分钟</span>
+            </div>
             <p>${post.excerpt}</p>
             <div class="post-meta">
                 <span class="post-date">📅 ${post.date}</span>
                 ${post.tags ? post.tags.map(tag => `<span class="post-tag">#${tag}</span>`).join('') : ''}
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // 渲染热门文章
@@ -204,11 +211,8 @@ function scrollToHeading(event, id) {
         const offset = 120;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
-        
+
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-        
-        document.querySelectorAll('.toc-list a').forEach(a => a.classList.remove('active'));
-        event.target.classList.add('active');
     }
 }
 
@@ -217,22 +221,60 @@ function setupScrollProgress() {
     window.addEventListener('scroll', () => {
         const articleView = document.getElementById('article-view');
         if (!articleView.classList.contains('active')) return;
-        
+
         const progressBar = document.getElementById('progress-bar');
         const article = document.getElementById('article-content');
         if (!article) return;
-        
+
         const articleTop = article.offsetTop;
         const articleHeight = article.offsetHeight;
         const windowHeight = window.innerHeight;
         const scrollPosition = window.scrollY;
-        
-        const progress = Math.min(100, Math.max(0, 
+
+        const progress = Math.min(100, Math.max(0,
             ((scrollPosition - articleTop + windowHeight) / articleHeight) * 100
         ));
-        
+
         progressBar.style.width = `${progress}%`;
+        
+        // 更新进度条文本
+        const progressText = document.getElementById('progress-text');
+        if (progressText) {
+            progressText.textContent = `${Math.round(progress)}%`;
+        }
+        
+        // 高亮当前章节
+        highlightActiveHeading();
     });
+}
+
+// 高亮当前阅读的章节
+function highlightActiveHeading() {
+    const article = document.getElementById('article-content');
+    if (!article) return;
+    
+    const headings = article.querySelectorAll('h2, h3');
+    if (headings.length === 0) return;
+    
+    const scrollPosition = window.scrollY + 150;
+    
+    let activeHeading = null;
+    headings.forEach(heading => {
+        const headingTop = heading.offsetTop;
+        if (headingTop <= scrollPosition) {
+            activeHeading = heading;
+        }
+    });
+    
+    if (activeHeading) {
+        const index = Array.from(headings).indexOf(activeHeading);
+        document.querySelectorAll('.toc-list a').forEach((link, i) => {
+            link.classList.remove('active');
+            if (i === index) {
+                link.classList.add('active');
+            }
+        });
+    }
 }
 
 // 加载文章统计（点赞等）
@@ -476,8 +518,9 @@ function setupCommentForm() {
 // 渲染归档
 function renderArchive() {
     const archiveList = document.getElementById('archive-list');
+    const timelineList = document.getElementById('timeline-list');
     const postsByMonth = {};
-    
+
     posts.forEach(post => {
         const month = post.date.substring(0, 7);
         if (!postsByMonth[month]) {
@@ -485,9 +528,10 @@ function renderArchive() {
         }
         postsByMonth[month].push(post);
     });
-    
+
     const sortedMonths = Object.keys(postsByMonth).sort((a, b) => b.localeCompare(a));
-    
+
+    // 列表视图
     archiveList.innerHTML = sortedMonths.map(month => {
         const monthPosts = postsByMonth[month];
         return `
@@ -497,13 +541,74 @@ function renderArchive() {
                     ${monthPosts.map(post => `
                         <div class="archive-post-item" onclick="loadArticle('${post.file}', '${post.title.replace(/'/g, "\\'")}')">
                             <span class="archive-post-title">${post.title}</span>
-                            <span class="archive-post-date">${post.date}</span>
+                            <span class="archive-post-meta">📊 ${post.wordCount || post.excerpt?.length || 100} 字 · ⏱️ ${post.readTime || Math.max(1, Math.ceil((post.excerpt?.length || 100) / 300))} 分钟</span>
                         </div>
                     `).join('')}
                 </div>
             </div>
         `;
     }).join('');
+    
+    // 年表视图
+    const postsByYear = {};
+    posts.forEach(post => {
+        const year = post.date.substring(0, 4);
+        if (!postsByYear[year]) {
+            postsByYear[year] = [];
+        }
+        postsByYear[year].push(post);
+    });
+    
+    const sortedYears = Object.keys(postsByYear).sort((a, b) => b.localeCompare(a));
+    
+    timelineList.innerHTML = sortedYears.map(year => {
+        const yearPosts = postsByYear[year];
+        return `
+            <div class="timeline-year">
+                <div class="timeline-year-header">
+                    <h2>${year} 年</h2>
+                    <span class="timeline-year-count">共 ${yearPosts.length} 篇文章</span>
+                </div>
+                <div class="timeline-items">
+                    ${yearPosts.map((post, index) => `
+                        <div class="timeline-item" onclick="loadArticle('${post.file}', '${post.title.replace(/'/g, "\\'")}')">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">${post.date}</div>
+                                <h3 class="timeline-title">${post.title}</h3>
+                                <p class="timeline-excerpt">${post.excerpt}</p>
+                                <div class="timeline-tags">
+                                    ${post.tags ? post.tags.map(tag => `<span class="timeline-tag">#${tag}</span>`).join('') : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 切换归档视图
+function switchArchiveView(view) {
+    const archiveList = document.getElementById('archive-list');
+    const timelineList = document.getElementById('timeline-list');
+    const tabs = document.querySelectorAll('.archive-tab');
+    
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.view === view) {
+            tab.classList.add('active');
+        }
+    });
+    
+    if (view === 'list') {
+        archiveList.style.display = 'block';
+        timelineList.style.display = 'none';
+    } else {
+        archiveList.style.display = 'none';
+        timelineList.style.display = 'block';
+    }
 }
 
 // 设置导航
@@ -985,3 +1090,4 @@ window.viewImage = viewImage;
 window.closeImageModal = closeImageModal;
 window.sortWallPosts = sortWallPosts;
 window.toggleMobileMenu = toggleMobileMenu;
+window.switchArchiveView = switchArchiveView;
