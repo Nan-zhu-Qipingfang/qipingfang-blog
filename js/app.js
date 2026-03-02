@@ -162,15 +162,20 @@ async function loadArticle(filename, title) {
         const response = await fetch(`posts/${filename}`);
         const markdown = await response.text();
         const html = marked.parse(markdown);
-        
+
         document.getElementById('article-content').innerHTML = `<h1>${title}</h1>` + html;
         currentArticle = filename;
-        
+
         generateTOC();
         loadComments();
         loadArticleStats();
         renderRelatedPosts();
         
+        // 记录浏览历史
+        if (typeof recordView === 'function') {
+            recordView(title, filename);
+        }
+
         navigateTo('article');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
